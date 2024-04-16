@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import get_type_hints
+from typing import get_type_hints, Optional
 
 import yarl
 
@@ -12,8 +12,8 @@ class URLConfig:
     port: int
     host: str = '127.0.0.1'
     path: str = '/'
-    user: str = None
-    password: str = None
+    user: Optional[str] = None
+    password: Optional[str] = None
 
     def __post_init__(self) -> None:
         type_hints = get_type_hints(URLConfig)
