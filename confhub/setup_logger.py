@@ -86,12 +86,14 @@ class LoggerReg:
 
 class SetupLogger:
     """
+
     Class for setting up logging using structlog.
     Attributes:
     name_registration (list[LoggerReg]): List of logger settings.
     default_development (bool): Flag to indicate the development mode, forces the output format to be CONSOLE. Default is False.
     log_to_file (bool): Flag to indicate that logs are written to a file. Default is False.
     logs_dir (str): Directory for writing logs. Default is "logs".
+
     Methods:
     __str__(): Returns a string representation of the class.
     __repr__(): Returns the class representation as a string.
@@ -99,6 +101,7 @@ class SetupLogger:
     timestamper(): Returns a TimeStamper object for the logger timestamp.
     preprocessors(addit: bool = False): Setting up structlog preprocessors.
     init_structlog(): Initializes logging settings using structlog.
+
     """
 
     def __init__(

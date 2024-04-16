@@ -3,6 +3,7 @@ from pathlib import Path
 
 import structlog
 from dynaconf import Dynaconf, LazySettings
+from dynaconf.utils.boxing import DynaBox
 
 from confhub.enums import Service
 from confhub.exceptions import PathError, ModuleException
@@ -19,7 +20,32 @@ logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
 
 class ReaderConf:
-    def __init__(self, *paths: str | Path, env: str = '.env', dev: bool = False) -> None:
+    """
+
+    Class for reading configuration files.
+    Supported configuration formats:
+        - .toml - Default and recommended file format.
+        - .yaml|.yml - Recommended for Django applications.
+        - .json - Useful to reuse existing or exported settings.
+        - .ini - Useful to reuse legacy settings.
+        - .py - Not Recommended but supported for backwards compatibility.
+        - .env - Useful to automate the loading of environment variables.
+
+    It also allows you to specify separate `env` files for reading project environment variables.
+
+    Methods:
+    data_export(): Returns collected data in dictionary format.
+    create_service_urls(): Finds services in the configuration and creates URLs for them.
+
+    """
+    def __init__(self, *paths: str | Path, env: str | Path = '.env', dev: bool = False) -> None:
+        """
+
+        :param paths: str | Path - Configuration path
+        :param env: str| Path - Path to the project environment variable file
+        :param dev: Local priority for configuration determination
+        """
+        self.dev = dev
         PathError.checking_paths(*paths)
         settings_files = [*paths]
 
@@ -29,24 +55,38 @@ class ReaderConf:
         except PathError as _:
             logger.warning('The `.env` file was not found and will not be loaded!', env_path=env)
 
-        _data: LazySettings = Dynaconf(
+        __data: LazySettings = Dynaconf(
             load_dotenv=True,
             settings_files=settings_files
         )
 
-        if os.getenv('DEV', dev):
-            self.data = _data.get('development')
-        else:
-            self.data = _data.get('release')
+        self.data = self.data_export(data=__data)
 
-        if self.data is None:
+    def data_export(self, data: LazySettings) -> dict:
+        """
+        Returns collected data in dictionary format
+
+        :param data: LazySettings - LazySettings object
+        :return: dict - collected data in dictionary format depending on development conditions
+        """
+        if os.getenv('DEV', False) or self.dev:
+            __data: DynaBox = data.get('development')
+        else:
+            __data: DynaBox = data.get('release')
+
+        if __data is None:
             raise ModuleException('The configuration is empty! Please check your configuration data.')
 
+        return __data.to_dict()
+
     def create_service_urls(self) -> None:
-        for service_name in Service:
-            if service_name.value in self.data:
-                self.data.update({
-                    f"{service_name.value.lower()}_url": service_name.create_url(
-                        data=self.data.get(service_name.value).to_dict()
-                    )
-                })
+        """
+        Finds services in the configuration and creates URLs for them.
+
+        :return: None
+        """
+        self.data.update({
+            f"{service_name.value}_url": service_name.create_url(data=self.data.get(service_name.value))
+            for service_name in Service
+            if service_name.value in self.data
+        })

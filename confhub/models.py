@@ -1,5 +1,5 @@
 from dataclasses import dataclass, asdict
-from typing import get_type_hints, Optional
+from typing import get_type_hints, Optional, Any
 
 import yarl
 
@@ -23,6 +23,11 @@ class URLConfig:
             if not isinstance(value, type_):
                 print(type(type_))
                 raise ModelConfigError(item=field_name, item_type=type_)
+
+    def __setattr__(self, name, value):
+        if name == 'path':
+            value = '/' + value
+        super().__setattr__(name, value)
 
     def __repr__(self) -> str:
         return f"<ServiceConfig URL::{self.host}:{self.port}@{self.user}:{self.password}/{self.path}>"
