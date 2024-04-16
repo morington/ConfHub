@@ -19,7 +19,7 @@ debug its operation.
 
 
 setup_logger.py developed by morington
-https://gist.github.com/morington/
+https://gist.github.com/morington/906cbc6fca128bde4ab81fb8e8eed849
 """
 import os
 import sys
