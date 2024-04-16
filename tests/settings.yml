@@ -1,0 +1,7 @@
+dynaconf_merge: True
+
+development:
+  postgresql:
+    host: '127.0.0.1'
+
+release:
