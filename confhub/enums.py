@@ -32,6 +32,12 @@ class Service(Enum):
     def create_url(self, data: dict[str, str | int]) -> str:
         __config = URLConfig(scheme=self.get_scheme(), **data)
         url: str = __config.get_human_url()
-        logger.debug('Created URL service', url=url, service=self.value)
+
+        __hidden_config = __config
+        __hidden_config.user = f"{__hidden_config.user[0]}{'*'*len(__hidden_config.user)}{__hidden_config.user[-1]}"
+        __hidden_config.password = '*' * len(__hidden_config.password)
+        __hidden_url = __hidden_config.get_human_url()
+
+        logger.debug('Created URL service', url=__hidden_url, service=self.value)
 
         return url
