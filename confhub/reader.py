@@ -62,6 +62,12 @@ class ReaderConf:
 
         self.data = self.data_export(data=__data)
 
+    def __str__(self) -> str:
+        return f'<{self.__class__.__name__} env={self.__load_env}>'
+    
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} env={self.__load_env} paths={self.__paths}'
+
     def data_export(self, data: LazySettings) -> dict:
         """
         Returns collected data in dictionary format
