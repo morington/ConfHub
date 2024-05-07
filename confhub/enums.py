@@ -34,8 +34,13 @@ class Service(Enum):
         url: str = __config.get_human_url()
 
         __hidden_config = __config
-        __hidden_config.user = f"{__hidden_config.user[0]}{'*'*len(__hidden_config.user)}{__hidden_config.user[-1]}"
-        __hidden_config.password = '*' * len(__hidden_config.password)
+        
+        if __hidden_config.user:
+            __hidden_config.user = f"{__hidden_config.user[0]}{'*' * len(__hidden_config.user)}{__hidden_config.user[-1]}"
+
+        if __hidden_config.password:
+            __hidden_config.password = '*' * len(__hidden_config.password)
+            
         __hidden_url = __hidden_config.get_human_url()
 
         logger.debug('Created URL service', url=__hidden_url, service=self.value)
