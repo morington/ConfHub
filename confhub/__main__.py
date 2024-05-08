@@ -4,6 +4,7 @@ import structlog
 
 import confhub.commands as commands
 from confhub.setup_logger import SetupLogger, LoggerReg
+from confhub.__meta__ import __version__
 
 SetupLogger(
     name_registration=[
@@ -16,7 +17,7 @@ logger: structlog.BoundLogger = structlog.getLogger('confhub_configuration')
 
 class Config:
     def __init__(self):
-        self.parser = argparse.ArgumentParser(description="Confhub help")
+        self.parser = argparse.ArgumentParser(description=f"Confhub v{__version__} help")
         self.init_args()
 
         self.__args = self.parser.parse_args()
