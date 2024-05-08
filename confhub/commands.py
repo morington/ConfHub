@@ -36,7 +36,6 @@ def create(folder: str) -> None:
     logger.debug('`create` function called', folder=folder_path, current_dir=current_dir)
 
     if not folder_path.exists():
-        folder_path.mkdir(parents=True, exist_ok=True)
         _q = True
         while _q:
             confirmation_creation_folder = input(f'\nDo you want to create a new folder at ({folder_path})? [Y/n]\n: ')
@@ -45,6 +44,7 @@ def create(folder: str) -> None:
 
             if confirmation_creation_folder.lower() in ['y', 'yes', 'д', 'да']:
                 _q = False
+                folder_path.mkdir(parents=True, exist_ok=True)
                 generate_configurations_files(select_folder=folder_path)
             elif confirmation_creation_folder.lower() in ['n', 'no', 'н', 'нет']:
                 _q = False
