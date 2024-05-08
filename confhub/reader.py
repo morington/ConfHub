@@ -12,6 +12,7 @@ from confhub.exceptions import PathError, ModuleException
 from confhub.setup_logger import SetupLogger, LoggerReg
 
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
+load_dotenv()
 
 
 class ReaderConf:
@@ -36,13 +37,11 @@ class ReaderConf:
     def __init__(
             self,
             *paths: str | Path,
-            env: str | Path = '.env',
             dev: bool = False,
             logger_registrations: Optional[list[LoggerReg]] = None,
     ) -> None:
         """
         :param paths: str | Path - Configuration path
-        :param env: str| Path - Path to the project environment variable file
         :param dev: Local priority for configuration determination,
         :param logger_registrations: Logger configuration, default: LoggerReg(name="", level=LoggerReg.Level.DEBUG)
         """
@@ -56,12 +55,17 @@ class ReaderConf:
         settings_files = [*paths]
 
         try:
-            PathError.checking_paths(env)
-            load_dotenv(env)
+            PathError.checking_paths('.env')
         except PathError as _:
-            logger.warning('The `.env` file was not found and will not be loaded!', env_path=env)
+            logger.warning('The `.env` file was not found and will not be loaded!')
 
         __data: LazySettings = Dynaconf(settings_files=settings_files)
+
+        try:
+            self.is_dev = bool(__data.dev)
+        except ValueError:
+            logger.warning('Development clarification point is not set or is not of type `bool`', default_value=self.dev)
+            self.is_dev = False
 
         self.data = self.data_export(data=__data)
 
@@ -72,7 +76,7 @@ class ReaderConf:
         :param data: LazySettings - LazySettings object
         :return: dict - collected data in dictionary format depending on development conditions
         """
-        if os.getenv('DEV', False) or self.dev:
+        if self.is_dev or self.dev:
             __data: DynaBox = data.get('development')
         else:
             __data: DynaBox = data.get('release')

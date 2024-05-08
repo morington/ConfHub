@@ -1,13 +1,14 @@
-dynaconf_merge: True
+dynaconf_merge: '@bool True'
+DEV: '@bool True'
 
 development:
   # Development Configuration
   
   postgresql:
-    host: '127.0.0.1'
+    host: '@str 127.0.0.1'
 
 release:
   # Release configuration
   
   postgresql:
-    host: '0.0.0.0'
+    host: '@str 0.0.0.0'

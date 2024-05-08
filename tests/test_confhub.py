@@ -13,7 +13,7 @@ def test_model() -> None:
 
 
 def test_reader() -> None:
-    reader = ReaderConf('tests/settings.yml', 'tests/.secrets.yml', env='tests/.env', dev=True, )
+    reader = ReaderConf('tests/settings.yml', 'tests/.secrets.yml', dev=True, )
     reader.create_service_urls()
     configuration = reader.data
 

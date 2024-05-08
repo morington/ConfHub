@@ -1,58 +1,63 @@
-SECRETS = """dynaconf_merge: True
+SECRETS = """dynaconf_merge: '@bool True'
 
 development:
   # Development Configuration
   
   postgresql:
-    port: 5432
-    user: 'ghost'
-    password: 'qwerty'
-    path: 'database'
+    scheme: '@str postgresql+asyncpg'
+    port: '@int 5432'
+    user: '@str ghost'
+    password: '@str qwerty'
+    path: '@str database'
 
 release:
   # Release configuration
   
   postgresql:
-    port: 0000
-    user: ''
-    password: ''
-    path: ''
+    scheme: '@str postgresql+asyncpg'
+    port: '@int 0000'
+    user: '@str '
+    password: '@str '
+    path: '@str '
+
 """
 
-SECRETS_EXAMPLE = """dynaconf_merge: True
+SECRETS_EXAMPLE = """dynaconf_merge: '@bool True'
 
 development:
   # Development Configuration
   
   postgresql:
-    port: <port :number>
-    user: <username :string>
-    password: <password :string>
-    path: <name_database :string>
+    port: '@int '
+    user: '@str '
+    password: '@str '
+    path: '@str '
 
 release:
   # Release configuration
   
   postgresql:
-    port: <port :number>
-    user: <username :string>
-    password: <password :string>
-    path: <name_database :string>
+    port: '@int '
+    user: '@str '
+    password: '@str '
+    path: '@str '
+
 """
 
-SETTINGS = """dynaconf_merge: True
+SETTINGS = """dynaconf_merge: '@bool True'
+DEV: '@bool True'
 
 development:
   # Development Configuration
   
   postgresql:
-    host: '127.0.0.1'
+    host: '@str 127.0.0.1'
 
 release:
   # Release configuration
   
   postgresql:
-    host: '0.0.0.0'
+    host: '@str 0.0.0.0'
 """
 
 

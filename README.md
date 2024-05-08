@@ -55,7 +55,7 @@ Do you want to create a new folder at (D:\ConfHub\test)? [Y/n]
 ```python
 from confhub.reader import ReaderConf
 
-reader = ReaderConf('config/settings.yml', 'config/.secrets.yml', env='config/.env', dev=True)
+reader = ReaderConf('config/settings.yml', 'config/.secrets.yml', dev=True)
 reader.create_service_urls()
 configuration = reader.data
 
@@ -89,7 +89,7 @@ from confhub.setup_logger import LoggerReg
 """
 
 reader = ReaderConf(
-    'config/settings.yml', 'config/.secrets.yml', env='config/.env', dev=True,
+    'config/settings.yml', 'config/.secrets.yml', dev=True,
     logger_registrations = [
         LoggerReg(name="название вашего логера", level=LoggerReg.Level.INFO),
         LoggerReg(name="название вашего следующего логера", level=LoggerReg.Level.ERROR),
