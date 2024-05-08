@@ -40,6 +40,10 @@ class Config:
         )
 
 
-if __name__ == '__main__':
+def main() -> None:
     config = Config()
     config.parsing()
+
+
+if __name__ == '__main__':
+    main()
