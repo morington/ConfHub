@@ -1,7 +1,7 @@
 # Changelog
 ---
 
-# v0.0.3.1a
+# v0.0.3.*a
 - Fixing bugs with console scripts
 
 ---
