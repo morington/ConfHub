@@ -45,3 +45,6 @@ path = "confhub/__meta__.py"
 
 [project.urls]
 Repository = "https://github.com/morington/confhub/"
+
+[project.scripts]
+hello-world = "confhub"
