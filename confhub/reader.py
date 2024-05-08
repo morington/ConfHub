@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Optional, Any
 
 import structlog
 from dynaconf import Dynaconf, LazySettings
@@ -9,13 +10,6 @@ from confhub.enums import Service
 from confhub.exceptions import PathError, ModuleException
 from confhub.setup_logger import SetupLogger, LoggerReg
 
-SetupLogger(
-    name_registration=[
-        LoggerReg(name="confhub", level=LoggerReg.Level.DEBUG),
-        LoggerReg(name="exceptions", level=LoggerReg.Level.DEBUG)
-    ],
-    default_development=True
-)
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
 
@@ -38,13 +32,24 @@ class ReaderConf:
     create_service_urls(): Finds services in the configuration and creates URLs for them.
 
     """
-    def __init__(self, *paths: str | Path, env: str | Path = '.env', dev: bool = False) -> None:
+    def __init__(
+            self,
+            *paths: str | Path,
+            env: str | Path = '.env',
+            dev: bool = False,
+            logger_registrations: Optional[list[LoggerReg]] = None,
+    ) -> None:
         """
-
         :param paths: str | Path - Configuration path
         :param env: str| Path - Path to the project environment variable file
-        :param dev: Local priority for configuration determination
+        :param dev: Local priority for configuration determination,
+        :param logger_registrations: Logger configuration, default: LoggerReg(name="", level=LoggerReg.Level.DEBUG)
         """
+        if logger_registrations is None:
+            logger_registrations = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)]
+
+        SetupLogger(name_registration=logger_registrations, default_development=dev)
+
         self.dev = dev
         PathError.checking_paths(*paths)
         settings_files = [*paths]
@@ -61,12 +66,6 @@ class ReaderConf:
         )
 
         self.data = self.data_export(data=__data)
-
-    def __str__(self) -> str:
-        return f'<{self.__class__.__name__} env={self.__load_env}>'
-    
-    def __repr__(self) -> str:
-        return f'<{self.__class__.__name__} env={self.__load_env} paths={self.__paths}'
 
     def data_export(self, data: LazySettings) -> dict:
         """
