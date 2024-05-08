@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Any
 
 import structlog
+from dotenv import load_dotenv
 from dynaconf import Dynaconf, LazySettings
 from dynaconf.utils.boxing import DynaBox
 
@@ -56,14 +57,11 @@ class ReaderConf:
 
         try:
             PathError.checking_paths(env)
-            settings_files.append(env)
+            load_dotenv(env)
         except PathError as _:
             logger.warning('The `.env` file was not found and will not be loaded!', env_path=env)
 
-        __data: LazySettings = Dynaconf(
-            load_dotenv=True,
-            settings_files=settings_files
-        )
+        __data: LazySettings = Dynaconf(settings_files=settings_files)
 
         self.data = self.data_export(data=__data)
 

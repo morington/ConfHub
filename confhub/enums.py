@@ -30,7 +30,10 @@ class Service(Enum):
         return Schemes[self.value].value
 
     def create_url(self, data: dict[str, str | int]) -> str:
-        __config = URLConfig(scheme=self.get_scheme(), **data)
+        __config = URLConfig(
+            scheme=data.get('scheme', self.get_scheme()),
+            **{key: value for key, value in data.items() if key != 'scheme'}
+        )
         url: str = __config.get_human_url()
 
         __hidden_config = __config

@@ -1,10 +1,14 @@
 # Changelog
 ---
 
-# v0.0.3.*a
-- Fixing bugs with console scripts
+# v0.0.4a
+- Fixing bugs with loading environment variables
+- Adding a `scheme` parameter for services to the configuration
 
 ---
+
+# v0.0.3.*a
+- Fixing bugs with console scripts
 
 ---
 
