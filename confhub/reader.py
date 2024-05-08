@@ -45,11 +45,6 @@ class ReaderConf:
         :param dev: Local priority for configuration determination,
         :param logger_registrations: Logger configuration, default: LoggerReg(name="", level=LoggerReg.Level.DEBUG)
         """
-        if logger_registrations is None:
-            logger_registrations = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)]
-
-        SetupLogger(name_registration=logger_registrations, default_development=dev)
-
         self.dev = dev
         PathError.checking_paths(*paths)
         settings_files = [*paths]
@@ -68,6 +63,12 @@ class ReaderConf:
             self.is_dev = False
 
         self.data = self.data_export(data=__data)
+
+        logger.debug('Loading logger parameters...')
+        if logger_registrations is None:
+            logger_registrations = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)]
+
+        SetupLogger(name_registration=logger_registrations, default_development=self.dev or self.is_dev)
 
     def data_export(self, data: LazySettings) -> dict:
         """

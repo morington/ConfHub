@@ -1,6 +1,13 @@
 # Changelog
 ---
 
+# v0.0.5.*a
+- Fixing bugs with loading environment variables
+- Adding a `scheme` parameter for services to the configuration
+- Updated development mode loading for logger
+
+---
+
 # v0.0.4a
 - Fixing bugs with loading environment variables
 - Adding a `scheme` parameter for services to the configuration
@@ -8,12 +15,8 @@
 ---
 
 # v0.0.3.*a
-- Fixing bugs with console scripts
-
----
-
-# v0.0.3a
 - Instructions for installation and use are written in README.md
+- Fixing bugs with console scripts
 
 ---
 
