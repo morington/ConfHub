@@ -36,7 +36,8 @@ dependencies = [
     "dynaconf>=3.2.5",
     "pytest>=8.1.1",
     "structlog>=24.1.0",
-    "yarl>=1.9.4"
+    "yarl>=1.9.4",
+    "python-dotenv>=1.0.1"
 ]
 dynamic = ["version"]
 
