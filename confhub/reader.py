@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Optional, Any
 
 import structlog
-from dotenv import load_dotenv
 from dynaconf import Dynaconf, LazySettings
 from dynaconf.utils.boxing import DynaBox
 
@@ -12,7 +11,6 @@ from confhub.exceptions import PathError, ModuleException
 from confhub.setup_logger import SetupLogger, LoggerReg
 
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
-load_dotenv()
 
 
 class ReaderConf:
