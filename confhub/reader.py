@@ -19,6 +19,17 @@ class Confhub:
             developer_mode: bool = False,
             logger_regs: Optional[list[LoggerReg]] = None,
     ) -> None:
+        """
+        Example:
+        import dataclasses
+
+        from confhub import Confhub
+
+        if __name__ == '__main__':
+            data: type[dataclasses.dataclass] = Confhub(developer_mode=False).data
+
+            print(data.postgresql.host)
+        """
         service_data = get_service_data()
         _config_path = service_data.get('configs_path')
         if not _config_path or not isinstance(_config_path, str):
