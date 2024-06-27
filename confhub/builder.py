@@ -65,7 +65,7 @@ class ConfigurationBuilder:
                         else:
                             existing_file = True
 
-            if existing_file:
+            if existing_file or existing_file is None:
                 with open(file_path, 'w', encoding='utf-8') as file:
                     yaml.dump(data, file, default_flow_style=False)
 
