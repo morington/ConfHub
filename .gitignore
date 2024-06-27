@@ -160,3 +160,6 @@ cython_debug/
 .idea/
 
 .pypirc
+
+Added using Confhub
+.secrets.*

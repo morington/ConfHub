@@ -1,98 +1,53 @@
-import os
+import dataclasses
+import fnmatch
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional, Type, List
 
 import structlog
-from dynaconf import Dynaconf, LazySettings
-from dynaconf.utils.boxing import DynaBox
 
-from confhub.enums import Service
-from confhub.exceptions import PathError, ModuleException
+from confhub import BlockCore
+from confhub.core.parsing import get_service_data, YamlFileMerger
 from confhub.setup_logger import SetupLogger, LoggerReg
+from confhub.utils.__models import get_models_from_path
 
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
 
-class ReaderConf:
-    """
-
-    Class for reading configuration files.
-    Supported configuration formats:
-        - .toml - Default and recommended file format.
-        - .yaml|.yml - Recommended for Django applications.
-        - .json - Useful to reuse existing or exported settings.
-        - .ini - Useful to reuse legacy settings.
-        - .py - Not Recommended but supported for backwards compatibility.
-        - .env - Useful to automate the loading of environment variables.
-
-    It also allows you to specify separate `env` files for reading project environment variables.
-
-    Methods:
-    data_export(): Returns collected data in dictionary format.
-    create_service_urls(): Finds services in the configuration and creates URLs for them.
-
-    """
+class Confhub:
     def __init__(
             self,
-            *paths: str | Path,
-            dev: bool = False,
-            logger_registrations: Optional[list[LoggerReg]] = None,
+            developer_mode: bool = False,
+            logger_regs: Optional[list[LoggerReg]] = None,
     ) -> None:
-        """
-        :param paths: str | Path - Configuration path
-        :param dev: Local priority for configuration determination,
-        :param logger_registrations: Logger configuration, default: LoggerReg(name="", level=LoggerReg.Level.DEBUG)
-        """
-        self.dev = dev
-        PathError.checking_paths(*paths)
-        settings_files = [*paths]
+        service_data = get_service_data()
+        _config_path = service_data.get('configs_path')
+        if not _config_path or not isinstance(_config_path, str):
+            raise ValueError("Directory `config` not defined")
 
-        try:
-            PathError.checking_paths('.env')
-        except PathError as _:
-            logger.warning('The `.env` file was not found and will not be loaded!')
+        self.developer_mode = developer_mode if developer_mode else service_data.get('developer_mode')
+        if self.developer_mode:
+            logger.warning('Developer mode enabled for configuration')
 
-        __data: LazySettings = Dynaconf(settings_files=settings_files)
+        SetupLogger(name_registration=logger_regs, developer_mode=developer_mode)
 
-        try:
-            self.is_dev = bool(__data.dev)
-        except ValueError:
-            logger.warning('Development clarification point is not set or is not of type `bool`', default_value=self.dev)
-            self.is_dev = False
+        models: List[BlockCore] = get_models_from_path(data=service_data)
 
-        self.data = self.data_export(data=__data)
+        config_path = Path(service_data.get('configs_path'))
+        config_list = list(config_path.glob('*'))
+        filtered_config_list = [file for file in config_list if not fnmatch.fnmatch(file.name, 'example__*')]
 
-        logger.debug('Loading logger parameters...')
-        if logger_registrations is None:
-            logger_registrations = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)]
+        self.data = self.__load(*models, files=filtered_config_list)
 
-        SetupLogger(name_registration=logger_registrations, default_development=self.dev or self.is_dev)
+    def __load(self, *models: BlockCore, files: List[str | Path]) -> Type[dataclasses.dataclass]:
+        merger = YamlFileMerger(*files)
 
-    def data_export(self, data: LazySettings) -> dict:
-        """
-        Returns collected data in dictionary format
+        __fields_from_dataclass = []
+        for block in models:
+            value = block.from_dict(merger.data.get(block.__block__), development_mode=self.developer_mode)
 
-        :param data: LazySettings - LazySettings object
-        :return: dict - collected data in dictionary format depending on development conditions
-        """
-        if self.is_dev or self.dev:
-            __data: DynaBox = data.get('development')
-        else:
-            __data: DynaBox = data.get('release')
+            if not value:
+                continue
 
-        if __data is None:
-            raise ModuleException('The configuration is empty! Please check your configuration data.')
+            __fields_from_dataclass.append((block.__block__, type(block), dataclasses.field(default=value)))
 
-        return __data.to_dict()
-
-    def create_service_urls(self) -> None:
-        """
-        Finds services in the configuration and creates URLs for them.
-
-        :return: None
-        """
-        self.data.update({
-            f"{service_name.value}_url": service_name.create_url(data=self.data.get(service_name.value))
-            for service_name in Service
-            if service_name.value in self.data
-        })
+        return dataclasses.make_dataclass('Data', __fields_from_dataclass)

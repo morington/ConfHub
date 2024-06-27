@@ -28,6 +28,7 @@ import logging.config
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Optional, List
 
 import structlog
 from structlog.typing import EventDict
@@ -89,7 +90,7 @@ class SetupLogger:
 
     Class for setting up logging using structlog.
     Attributes:
-    name_registration (list[LoggerReg]): List of logger settings.
+    name_registration (List[LoggerReg]): List of logger settings.
     default_development (bool): Flag to indicate the development mode, forces the output format to be CONSOLE. Default is False.
     log_to_file (bool): Flag to indicate that logs are written to a file. Default is False.
     logs_dir (str): Directory for writing logs. Default is "logs".
@@ -106,14 +107,14 @@ class SetupLogger:
 
     def __init__(
             self,
-            name_registration: list[LoggerReg],
-            default_development: bool = False,
+            name_registration: Optional[List[LoggerReg]],
+            developer_mode: bool = False,
             log_to_file: bool = False,
             logs_dir: str = "logs",
             file_write_format: str = JSONFORMAT_FORMATTER
     ) -> None:
-        self.name_registration = name_registration
-        self.default_development = default_development
+        self.name_registration = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)] if name_registration is None else name_registration
+        self.developer_mode = developer_mode
         self.log_to_file = log_to_file
         self.logs_dir = logs_dir
         self.file_write_format = file_write_format
@@ -133,7 +134,7 @@ class SetupLogger:
         Returns:
         str: Format.
         """
-        if sys.stderr.isatty() or os.environ.get("DEV", self.default_development):
+        if sys.stderr.isatty() or os.environ.get("DEV", self.developer_mode):
             return CONSOLE_HANDLER
         return JSONFORMAT_HANDLER
 
@@ -146,15 +147,15 @@ class SetupLogger:
         """
         return structlog.processors.TimeStamper(fmt="%Y-%m-%d %H:%M:%S")
 
-    def preprocessors(self, addit: bool = False) -> list[any]:
+    def preprocessors(self, addit: bool = False) -> List[any]:
         """
         Setting up structlog preprocessors.
         Parameters:
         addit (bool): Flag for additional handlers. Default is False.
         Returns:
-        list[any]: List of preprocessors.
+        List[any]: List of preprocessors.
         """
-        preprocessors: list[any] = [
+        preprocessors: List[any] = [
             self.timestamper,
             structlog.stdlib.add_log_level,
             structlog.processors.format_exc_info,
@@ -170,7 +171,7 @@ class SetupLogger:
             logger_detailed,
         ]
         if addit:
-            preprocessors: list[any] = (
+            preprocessors: List[any] = (
                     [
                         structlog.contextvars.merge_contextvars,
                         structlog.stdlib.filter_by_level,

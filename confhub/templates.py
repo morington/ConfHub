@@ -1,63 +1,36 @@
-SECRETS = """dynaconf_merge: '@bool True'
-
-development:
-  # Development Configuration
-  
-  postgresql:
-    scheme: '@str postgresql+asyncpg'
-    port: '@int 5432'
-    user: '@str ghost'
-    password: '@str qwerty'
-    path: '@str database'
-
-release:
-  # Release configuration
-  
-  postgresql:
-    scheme: '@str postgresql+asyncpg'
-    port: '@int 0000'
-    user: '@str '
-    password: '@str '
-    path: '@str '
+SERVICE = """developer_mode: True
+models_path: {models_path}
+configs_path: {configs_path}
 
 """
 
-SECRETS_EXAMPLE = """dynaconf_merge: '@bool True'
+SAMPLE_MODELS = """from confhub import BlockCore, field
 
-development:
-  # Development Configuration
-  
-  postgresql:
-    port: '@int '
-    user: '@str '
-    password: '@str '
-    path: '@str '
+''' Sample class based on configuration for PostgreSQL '''
 
-release:
-  # Release configuration
-  
-  postgresql:
-    port: '@int '
-    user: '@str '
-    password: '@str '
-    path: '@str '
+
+class PostgreSQL(BlockCore):
+    __block__ = 'postgresql'  # Name of the block header in the configuration
+
+    '''
+    Creating values is very simple:
+        value_name = field(data_type, development_mode=True/False, secret=True/False, filename='MY_FILE')
+        
+        data_type - типа значения данных в конфигурации, поддерживаемые типы: 
+        development_mode - indicates whether the field will have a different value in development mode (default False)
+        secret - means whether to hide this field as secrets (default is False, all files go to settings by default)
+        filename - you can independently define the field in the file that is required, Confhub will create it for you
+    '''
+    scheme = field(str)
+    host = field(str, development_mode=True)
+    port = field(int, secret=True)
+    user = field(str, secret=True)
+    password = field(str, secret=True)
+    path = field(str, secret=True)
 
 """
 
-SETTINGS = """dynaconf_merge: '@bool True'
-DEV: '@bool True'
+INIT_SAMPLE = """
+__all__ = []
 
-development:
-  # Development Configuration
-  
-  postgresql:
-    host: '@str 127.0.0.1'
-
-release:
-  # Release configuration
-  
-  postgresql:
-    host: '@str 0.0.0.0'
 """
-
-
