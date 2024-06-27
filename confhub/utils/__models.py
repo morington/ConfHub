@@ -1,4 +1,5 @@
 import importlib
+import sys
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -10,6 +11,9 @@ logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
 
 def get_models_from_path(data: Dict[str, Any]) -> List[BlockCore]:
+    project_path = Path.cwd()
+    sys.path.append(str(project_path.resolve()))
+
     module_path = Path(data.get('models_path'))
     module_name = '.'.join(module_path.parts[-2:]).replace('.py', '')
 
