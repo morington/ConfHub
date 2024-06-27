@@ -1,4 +1,4 @@
-![](./logo.png)
+![logo_confhub](https://github.com/morington/ConfHub/blob/main/logo.png?raw=true)
 
 <p align="center">
     <img alt="PyPI - Status" src="https://img.shields.io/pypi/status/confhub">
