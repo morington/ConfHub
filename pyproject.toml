@@ -33,11 +33,10 @@ classifiers = [
     "Topic :: Utilities"
 ]
 dependencies = [
-    "dynaconf>=3.2.5",
     "pytest>=8.1.1",
     "structlog>=24.1.0",
     "yarl>=1.9.4",
-    "python-dotenv>=1.0.1"
+    "PyYAML>=6.0.1",
 ]
 dynamic = ["version"]
 
