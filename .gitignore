@@ -163,3 +163,4 @@ cython_debug/
 
 Added using Confhub
 .secrets.*
+.service.*
