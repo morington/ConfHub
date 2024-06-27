@@ -114,6 +114,7 @@ class SetupLogger:
             file_write_format: str = JSONFORMAT_FORMATTER
     ) -> None:
         self.name_registration = [LoggerReg(name="", level=LoggerReg.Level.DEBUG)] if name_registration is None else name_registration
+        self.name_registration.extend([LoggerReg(name="confhub", level=LoggerReg.Level.INFO)])
         self.developer_mode = developer_mode
         self.log_to_file = log_to_file
         self.logs_dir = logs_dir

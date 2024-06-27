@@ -4,7 +4,7 @@ from confhub.setup_logger import SetupLogger, LoggerReg
 
 SetupLogger(
     name_registration=[
-        LoggerReg(name="confhub", level=LoggerReg.Level.INFO),
+        LoggerReg(name="*", level=LoggerReg.Level.INFO),
     ],
     developer_mode=True
 )
