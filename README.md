@@ -162,4 +162,4 @@ The `developer_mode` argument is available both in the `Confhub` class and in th
 
 *********
 ## License
-[Сonfhub](https://github.com/morington/help) is distributed under the [MIT license](https://github.com/morington/help/blob/main/LICENSE). This means that you are free to use, modify and distribute the library for any purpose, including commercial use.
+[Сonfhub](https://github.com/morington/confhub) is distributed under the [MIT license](https://github.com/morington/confhub/blob/main/LICENSE). This means that you are free to use, modify and distribute the library for any purpose, including commercial use.
