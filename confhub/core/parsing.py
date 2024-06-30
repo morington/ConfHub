@@ -44,7 +44,7 @@ def get_service_data() -> Dict[str, Any]:
     return yml_data.data
 
 
-def parsing_value(value: str, development_mode: bool) -> Union[str, int, float, bool]:
+def parsing_value(value: str, development_mode: bool) -> Union[str, int, float, bool, list]:
     if isinstance(value, List):
         return [parsing_value(_value, development_mode) for _value in value]
     else:

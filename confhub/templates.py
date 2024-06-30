@@ -16,13 +16,13 @@ class PostgreSQL(BlockCore):
     Creating values is very simple:
         value_name = field(data_type, development_mode=True/False, secret=True/False, filename='MY_FILE')
         
-        data_type - типа значения данных в конфигурации, поддерживаемые типы: 
-        development_mode - indicates whether the field will have a different value in development mode (default False)
+        data_type - data value type in the configuration, supported types: `str`, `int`, `float`, `bool`
         secret - means whether to hide this field as secrets (default is False, all files go to settings by default)
-        filename - you can independently define the field in the file that is required, Confhub will create it for you
+        filename - you can independently define the field in the file that is required, Confhub will create it for you.
+            If a file starts with a dot, it automatically goes into .gitignore.
     '''
     scheme = field(str)
-    host = field(str, development_mode=True)
+    host = field(str)
     port = field(int, secret=True)
     user = field(str, secret=True)
     password = field(str, secret=True)
