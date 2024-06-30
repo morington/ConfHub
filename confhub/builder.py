@@ -54,21 +54,17 @@ class ConfigurationBuilder:
         for filename, data in self.datafiles.items():
             file_path = config_path / Path(f'{filename}.yml')
 
-            existing_file = None
             if file_path.exists():
-                while existing_file is None:
-                    result = input(f"The `{file_path}` file already exists, should I recreate it? [Y/n] ")
+                with open(file_path, 'r', encoding='utf-8') as file:
+                    yaml_data = yaml.safe_load(file)
 
-                    if result.lower() in ['y', 'n', '', ' ']:
-                        if result.lower() == 'n':
-                            existing_file = False
-                        else:
-                            existing_file = True
+                    for key in data:
+                        if key in yaml_data:
+                            for inner_key in data[key]:
+                                if inner_key in yaml_data[key]:
+                                    data[key][inner_key] = yaml_data[key][inner_key]
 
-            if existing_file or existing_file is None:
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    yaml.dump(data, file, default_flow_style=False)
+            with open(file_path, 'w', encoding='utf-8') as file:
+                yaml.dump(data, file, default_flow_style=False)
 
-                logger.info("Create file", path=file_path)
-            else:
-                logger.info('Skip...', path=file_path)
+            logger.info("Create file", path=file_path)
