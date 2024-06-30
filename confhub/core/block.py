@@ -1,3 +1,5 @@
+from typing import Type
+
 from confhub.core.fields import ConfigurationField
 from confhub.core.parsing import parsing_value
 
