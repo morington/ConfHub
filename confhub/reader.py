@@ -47,7 +47,7 @@ class Confhub:
         config_list = list(config_path.glob('*'))
         filtered_config_list = [file for file in config_list if not fnmatch.fnmatch(file.name, 'example__*')]
 
-        self.data = self.__load(*models, files=filtered_config_list)
+        self.models = self.__load(*models, files=filtered_config_list)
 
     def __load(self, *models: BlockCore, files: List[str | Path]) -> Type[dataclasses.dataclass]:
         merger = YamlFileMerger(*files)

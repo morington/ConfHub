@@ -134,8 +134,8 @@ logger = structlog.get_logger(__name__)
 
 if __name__ == '__main__':
     config = Confhub(developer_mode=True, logger_regs=[
-        LoggerReg(name="", level=LoggerReg.Level.DEBUG,)
-    ]).data
+        LoggerReg(name="", level=LoggerReg.Level.DEBUG, )
+    ]).models
 
     logger.info("PostgreSQL", host=config.postgresql.host)
     logger.info("Admins", host=config.test.admins)
