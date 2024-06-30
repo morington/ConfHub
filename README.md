@@ -9,7 +9,7 @@
 
 *********
 ## About
-<b>Сonfhub</b> is a library that relieves developers of the tedious task of creating and managing configuration files. Instead of wasting valuable time writing configurations, developers can focus on building the site's functionality.
+<b>Сonfhub</b> is a library that relieves developers of the tedious task of creating and managing configuration files. Instead of wasting valuable time writing configurations, developers can focus on building the project's functionality.
 
 ### History
 Based on our own experience and the experience of our colleagues, we realized that the process of working with configurations had become a real burden. We wanted something simple and effective. After several weeks of testing our MVP, we identified the strengths and weaknesses and presented the first alpha version of confhub to the world. Despite its shortcomings, it showed prospects for development.
@@ -92,7 +92,7 @@ confhub generate_models
 
 This command converts your models into configuration files with a `.yml` extension.
 
-Confhub generates two main files: `settings` and `.secrets`. The secrets are automatically added to `.gitignore`. You can also specify `filename` in models to create additional files in the `config` folder.
+Confhub generates two main files: `settings` and `.secrets`. Secrets, as well as files that begin with a dot, are automatically added to `.gitignore`. You can also specify `filename` in models to create additional files in the `config` folder.
 
 __Do not use `secrets` and `filename` at the same time. There may be unexpected consequences at this point!__
 

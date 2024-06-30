@@ -26,7 +26,7 @@ class Confhub:
         from confhub import Confhub
 
         if __name__ == '__main__':
-            data: type[dataclasses.dataclass] = Confhub(developer_mode=False).data
+            data: type[dataclasses.dataclass] = Confhub(developer_mode=False).models
 
             print(data.postgresql.host)
         """
