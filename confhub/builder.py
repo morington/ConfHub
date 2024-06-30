@@ -20,7 +20,15 @@ class ConfigurationBuilder:
     def generate_filenames(self) -> Dict[str, Any]:
         _datafiles = {'settings': {}, '.secrets': {}}
 
-        def add_field_to_datafiles(field_name: str, field: ConfigurationField, parent_path: List[str]) -> None:
+        def data_typing(field: ConfigurationField) -> Any:
+            if field.is_list:
+                return [field.get_default_value()]
+
+            return field.get_default_value()
+
+        def add_field_to_datafiles(
+                field_name: str, field: ConfigurationField, parent_path: List[str]
+        ) -> None:
             if field.secret:
                 target = _datafiles['.secrets']
             elif field.filename:
@@ -36,7 +44,7 @@ class ConfigurationBuilder:
                     current[part] = {}
                 current = current[part]
 
-            current[field_name] = field.get_default_value() if not field.is_list else [field.get_default_value()]
+            current[field_name] = data_typing(field)
 
         def has_configuration_fields(select_class: BlockCore) -> bool:
             if any(isinstance(item, ConfigurationField) for item in [
@@ -51,17 +59,23 @@ class ConfigurationBuilder:
                 else:
                     raise ConfhubError("Cannot find field in model object", select_class=select_class)
 
-        def process_block(_block: BlockCore, parent_path: List[str], parent: bool = False) -> None:
+        def process_block(_block: BlockCore, parent_path: List[str], parent: str = None) -> None:
             if hasattr(_block, '__exclude__') and _block.__exclude__ and not parent:
                 return
 
-            current_path = parent_path + [_block.__block__]
+            current_path = parent_path + [_block.__block__ if not parent else parent]
+            if parent:
+                current_path += [_block.__block__]
 
+            # field.is_list
             for field_name, field in (_block.__dict__.items() if has_configuration_fields(_block) else _block.__class__.__dict__.items()):
                 if isinstance(field, ConfigurationField):
-                    add_field_to_datafiles(field_name, field, current_path)
+                    if isinstance(field.data_type, BlockCore):
+                        process_block(field.data_type, current_path, parent=field_name)
+                    else:
+                        add_field_to_datafiles(field_name, field, current_path)
                 elif isinstance(field, BlockCore):
-                    process_block(field, current_path, parent=True)
+                    process_block(field, current_path, parent=field_name)
 
         for block in self.blocks:
             if block != BlockCore:
@@ -77,11 +91,14 @@ class ConfigurationBuilder:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     yaml_data = yaml.safe_load(file)
 
-                    for key in data:
-                        if key in yaml_data:
-                            for inner_key in data[key]:
-                                if inner_key in yaml_data[key]:
-                                    data[key][inner_key] = yaml_data[key][inner_key]
+                    if yaml_data:
+                        for key in data:
+                            if key in yaml_data:
+                                if not isinstance(yaml_data[key], Dict):
+                                    for inner_key in data[key]:
+                                        if inner_key in yaml_data[key]:
+                                            if isinstance(data[key][inner_key], type(yaml_data[key][inner_key])):
+                                                data[key][inner_key] = yaml_data[key][inner_key]
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 yaml.dump(data, file, default_flow_style=False)
