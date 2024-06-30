@@ -6,6 +6,7 @@ import structlog
 
 from confhub.core.block import BlockCore
 from confhub.core.fields import ConfigurationField
+from confhub.utils.gitignore import add_to_gitignore
 
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
@@ -66,5 +67,8 @@ class ConfigurationBuilder:
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 yaml.dump(data, file, default_flow_style=False)
+
+            if filename.startswith('.'):
+                add_to_gitignore(f"{filename}.*")
 
             logger.info("Create file", path=file_path)

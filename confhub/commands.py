@@ -68,6 +68,4 @@ def generate_models() -> None:
 
     ConfigurationBuilder(*models).create_files(Path.cwd() / Path(_config_path))
 
-    add_to_gitignore('.secrets.*')
-
     logger.info("Configuration successfully generated")
