@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Any, Dict, Optional
+from typing import List, Any, Dict, Optional, Type
 
 import yaml
 import structlog
@@ -22,9 +22,23 @@ class ConfigurationBuilder:
 
         def data_typing(field: ConfigurationField) -> Any:
             if field.is_list:
-                return [field.get_default_value()]
-
-            return field.get_default_value()
+                if isinstance(field.data_type, BlockCore):
+                    nested_block = {}
+                    for nested_field_name, nested_field in field.data_type.__class__.__dict__.items():
+                        if isinstance(nested_field, ConfigurationField):
+                            nested_block[nested_field_name] = data_typing(nested_field)
+                    return [nested_block]
+                else:
+                    return [field.get_default_value()]
+            else:
+                if isinstance(field.data_type, BlockCore):
+                    nested_block = {}
+                    for nested_field_name, nested_field in field.data_type.__class__.__dict__.items():
+                        if isinstance(nested_field, ConfigurationField):
+                            nested_block[nested_field_name] = data_typing(nested_field)
+                    return nested_block
+                else:
+                    return field.get_default_value()
 
         def add_field_to_datafiles(
                 field_name: str, field: ConfigurationField, parent_path: List[str]
@@ -44,7 +58,31 @@ class ConfigurationBuilder:
                     current[part] = {}
                 current = current[part]
 
-            current[field_name] = data_typing(field)
+            def new_nested(nested_model: Type[BlockCore]):
+                nested_block = {nested_model.__block__: {}}
+                for nested_field_name, nested_field in nested_model.__dict__.items():
+                    if isinstance(nested_field, ConfigurationField):
+                        if isinstance(nested_field.data_type, BlockCore):
+                            nested_block[nested_model.__block__][nested_field_name] = [new_nested(nested_field.data_type.__class__)]
+                        else:
+                            nested_block[nested_model.__block__][nested_field_name] = data_typing(nested_field)
+                    elif isinstance(nested_field, BlockCore):
+                        nested_block[nested_model.__block__][nested_field_name] = [new_nested(nested_field.__class__)]
+                return nested_block
+
+            if field.is_list and isinstance(field.data_type, BlockCore):
+                data = new_nested(field.data_type.__class__)
+                current[field_name] = [data]
+            elif field.is_list:
+                current[field_name] = [field.get_default_value()]
+            elif isinstance(field.data_type, BlockCore):
+                nested_block = {}
+                for nested_field_name, nested_field in field.data_type.__class__.__dict__.items():
+                    if isinstance(nested_field, ConfigurationField):
+                        nested_block[nested_field_name] = data_typing(nested_field)
+                current[field_name] = nested_block
+            else:
+                current[field_name] = field.get_default_value()
 
         def has_configuration_fields(select_class: BlockCore) -> bool:
             if any(isinstance(item, ConfigurationField) for item in [
@@ -67,11 +105,15 @@ class ConfigurationBuilder:
             if parent:
                 current_path += [_block.__block__]
 
-            # field.is_list
             for field_name, field in (_block.__dict__.items() if has_configuration_fields(_block) else _block.__class__.__dict__.items()):
                 if isinstance(field, ConfigurationField):
                     if isinstance(field.data_type, BlockCore):
-                        process_block(field.data_type, current_path, parent=field_name)
+                        if field.is_list:
+                            add_field_to_datafiles(field_name, field, current_path)
+                            process_block(field.data_type, current_path + [field_name])
+                        else:
+                            add_field_to_datafiles(field_name, field, current_path)
+                            process_block(field.data_type, current_path, parent=field_name)
                     else:
                         add_field_to_datafiles(field_name, field, current_path)
                 elif isinstance(field, BlockCore):
