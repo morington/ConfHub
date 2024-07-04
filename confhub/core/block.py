@@ -22,3 +22,8 @@ class BlockCore:
                     setattr(instance, attr_name, attr_value.from_dict(data.get(attr_value.__block__), development_mode))
 
             return instance
+
+
+def exclude(cls):
+    cls.__exclude__ = True
+    return cls

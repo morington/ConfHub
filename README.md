@@ -57,7 +57,7 @@ from confhub.reader import ReaderConf
 
 reader = ReaderConf('config/settings.yml', 'config/.secrets.yml', dev=True)
 reader.create_service_urls()
-configuration = reader.data
+configuration = reader.models
 
 assert configuration.get('postgresql_url') == 'postgresql+asyncpg://ghost:qwerty@127.0.0.1:5432/database'
 # True
