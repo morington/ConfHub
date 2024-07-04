@@ -35,7 +35,8 @@ class ConfigurationBuilder:
                     current[part] = {}
                 current = current[part]
 
-            current[field_name] = field.get_default_value()
+            if not isinstance(field.data_type, BlockCore):
+                current[field_name] = field.get_default_value()
 
         def process_block(_block: BlockCore, parent_path: List[str]) -> None:
             current_path = parent_path + [_block.__block__]

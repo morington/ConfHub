@@ -1,4 +1,4 @@
-from typing import Type
+from typing import Type, Any
 
 from confhub.core.types import DataTypeMapping
 
@@ -19,7 +19,7 @@ class ConfigurationField:
 
 
 def field(
-        data_type: Type,
+        data_type: Any,
         secret: bool = False,
         filename: str = None
 ) -> ConfigurationField:
