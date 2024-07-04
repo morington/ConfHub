@@ -5,7 +5,7 @@ MAPPING = {
     "str": (str, "VALUE"),
     "int": (int, "1234"),
     "float": (float, "1234.101"),
-    "bool": (bool, "true"),
+    "bool": (bool, "true")
 }
 
 

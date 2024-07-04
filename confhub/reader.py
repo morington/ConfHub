@@ -62,3 +62,8 @@ class Confhub:
             __fields_from_dataclass.append((block.__block__, type(block), dataclasses.field(default=value)))
 
         return dataclasses.make_dataclass('Data', __fields_from_dataclass)
+
+
+if __name__ == '__main__':
+    data = Confhub().models
+    print()
