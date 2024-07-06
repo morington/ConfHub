@@ -125,31 +125,31 @@ class ConfigurationBuilder:
     def create_files(self, config_path: Path) -> None:
         datafiles = self.remove_empty_dicts(self.datafiles)
 
-        def update_nested_dict(new_data, old_data):
-            if isinstance(old_data, Dict):
-                for key, value in old_data.items():
-                    if key in new_data:
-                        if isinstance(value, Dict):
-                            new_data[key] = update_nested_dict(new_data.get(key), value)
-                        elif isinstance(value, List):
-                            new_value = new_data.get(key)
-                            if isinstance(new_value, List):
-                                new_data[key] = update_nested_dict(new_value, value)
-                        else:
-                            new_data[key] = value
-                    else:
-                        ...
-
-            elif isinstance(old_data, List):
-                for item in old_data:
-                    if isinstance(item, dict):
-                        key = list(item.keys())[0]
-                        value = item[key]
-                        for new_item in new_data:
-                            if key in new_item:
-                                new_item[key] = value
-
-            return new_data
+        # def update_nested_dict(new_data, old_data):
+        #     if isinstance(old_data, Dict):
+        #         for key, value in old_data.items():
+        #             if key in new_data:
+        #                 if isinstance(value, Dict):
+        #                     new_data[key] = update_nested_dict(new_data.get(key), value)
+        #                 elif isinstance(value, List):
+        #                     new_value = new_data.get(key)
+        #                     if isinstance(new_value, List):
+        #                         new_data[key] = update_nested_dict(new_value, value)
+        #                 else:
+        #                     new_data[key] = value
+        #             else:
+        #                 ...
+        #
+        #     elif isinstance(old_data, List):
+        #         for item in old_data:
+        #             if isinstance(item, dict):
+        #                 key = list(item.keys())[0]
+        #                 value = item[key]
+        #                 for new_item in new_data:
+        #                     if key in new_item:
+        #                         new_item[key] = value
+        #
+        #     return new_data
 
         for filename, data in datafiles.items():
             file_path = config_path / Path(f'{filename}.yml')
@@ -159,7 +159,7 @@ class ConfigurationBuilder:
                     data_old_file = yaml.safe_load(file)
 
                     if data_old_file:
-                        ...# data = update_nested_dict(data, data_old_file)
+                        ... #  data = update_nested_dict(data, data_old_file)
 
             with open(file_path, 'w', encoding='utf-8') as file:
                 yaml.dump(data, file, default_flow_style=False)
