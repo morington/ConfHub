@@ -1,12 +1,11 @@
 import dataclasses
-import fnmatch
 from pathlib import Path
-from typing import Optional, Type, List
+from typing import Optional, Type, List, Dict, Any
 
 import structlog
 
 from confhub import BlockCore
-from confhub.core.parsing import get_service_data, YamlFileMerger
+from confhub.core.parsing import get_service_data, YamlFileMerger, get_config_files
 from confhub.setup_logger import SetupLogger, LoggerReg
 from confhub.utils.__models import get_models_from_path
 
@@ -43,11 +42,9 @@ class Confhub:
 
         models: List[BlockCore] = get_models_from_path(data=service_data)
 
-        config_path = Path(service_data.get('configs_path'))
-        config_list = list(config_path.glob('*'))
-        filtered_config_list = [file for file in config_list if not fnmatch.fnmatch(file.name, 'example__*')]
+        config_files: List[str | Path] = get_config_files(service_data=service_data)
 
-        self.models = self.__load(*models, files=filtered_config_list)
+        self.models = self.__load(*models, files=config_files)
 
     def __load(self, *models: BlockCore, files: List[str | Path]) -> Type[dataclasses.dataclass]:
         merger = YamlFileMerger(*files)

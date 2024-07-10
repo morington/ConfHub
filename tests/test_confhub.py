@@ -1,3 +1,4 @@
+# ruff: noqa: S101
 from confhub.models import URLConfig
 from confhub.reader import ReaderConf
 

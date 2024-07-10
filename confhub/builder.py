@@ -6,6 +6,7 @@ import structlog
 
 from confhub.core.block import BlockCore
 from confhub.core.fields import ConfigurationField
+from confhub.core.parsing import get_service_data, get_config_files, YamlFileMerger
 
 logger: structlog.BoundLogger = structlog.get_logger("confhub")
 
@@ -27,14 +28,12 @@ class ConfigurationBuilder:
                 if isinstance(attr_value, ConfigurationField):
                     # Расходимся на два пути, либо содержит Python тип, либо тип вложенной модели
                     if isinstance(attr_value.data_type, BlockCore):
-                        parents += [attr_name]
                         if attr_value.is_list:
                             self.list_type_blocks.append(attr_value.data_type.__block__)
-                            parents += [attr_value.data_type.__block__]
 
                         self.nested_model_processing(
                             field=attr_value,
-                            parent_blocks=parents
+                            parent_blocks=parents + [attr_name] + [attr_value.data_type.__block__]
                         )
                     else:
                         self.type_processing(
@@ -82,7 +81,8 @@ class ConfigurationBuilder:
         if secret:
             target = self.datafiles.get('.secrets')
         elif filename:
-            self.datafiles[filename] = {}
+            if not self.datafiles.get(filename, None):
+                self.datafiles[filename] = {}
             target = self.datafiles.get(filename)
         else:
             target = self.datafiles.get('settings')
@@ -122,46 +122,45 @@ class ConfigurationBuilder:
             return [ConfigurationBuilder.remove_empty_dicts(v) for v in data if v and ConfigurationBuilder.remove_empty_dicts(v)]
         return data
 
+    def sync_to_new_dict(self, old_data: Dict[str, Any], new_data: Dict[str, Any]) -> Dict[str, Any]:
+        def sync_values(old: Any, new: Any) -> Any:
+            if isinstance(old, dict) and isinstance(new, dict):
+                for key in new:
+                    if key in old:
+                        new[key] = sync_values(old[key], new[key])
+                    else:
+                        new[key] = old.get(key, new[key])
+                return new
+            elif isinstance(old, list) and isinstance(new, list):
+                for new_item in new.copy():
+                    for old_item in old:
+                        if isinstance(new_item, dict) and isinstance(old_item, dict):
+                            if list(new_item.keys())[0] == list(old_item.keys())[0]:
+                                new_item = sync_values(old_item, new_item)
+                        elif isinstance(new_item, list) and isinstance(old_item, list) or isinstance(new_item, str) and isinstance(old_item, str):
+                            new = old
+                return new
+            else:
+                return old
+
+        return sync_values(old_data, new_data)
+
     def create_files(self, config_path: Path) -> None:
         datafiles = self.remove_empty_dicts(self.datafiles)
 
-        # def update_nested_dict(new_data, old_data):
-        #     if isinstance(old_data, Dict):
-        #         for key, value in old_data.items():
-        #             if key in new_data:
-        #                 if isinstance(value, Dict):
-        #                     new_data[key] = update_nested_dict(new_data.get(key), value)
-        #                 elif isinstance(value, List):
-        #                     new_value = new_data.get(key)
-        #                     if isinstance(new_value, List):
-        #                         new_data[key] = update_nested_dict(new_value, value)
-        #                 else:
-        #                     new_data[key] = value
-        #             else:
-        #                 ...
-        #
-        #     elif isinstance(old_data, List):
-        #         for item in old_data:
-        #             if isinstance(item, dict):
-        #                 key = list(item.keys())[0]
-        #                 value = item[key]
-        #                 for new_item in new_data:
-        #                     if key in new_item:
-        #                         new_item[key] = value
-        #
-        #     return new_data
+        service_data: Dict[str, Any] = get_service_data()
+        config_files: List[str | Path] = get_config_files(service_data=service_data)
+        merger_data: Dict[str, Any] = YamlFileMerger(*config_files).data
 
         for filename, data in datafiles.items():
             file_path = config_path / Path(f'{filename}.yml')
 
-            if file_path.exists():
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    data_old_file = yaml.safe_load(file)
-
-                    if data_old_file:
-                        ... #  data = update_nested_dict(data, data_old_file)
+            if merger_data:
+                data_updated = self.sync_to_new_dict(merger_data, data)
+            else:
+                data_updated = data
 
             with open(file_path, 'w', encoding='utf-8') as file:
-                yaml.dump(data, file, default_flow_style=False)
+                yaml.dump(data_updated, file, default_flow_style=False)
 
             logger.info("Create file", path=file_path)
